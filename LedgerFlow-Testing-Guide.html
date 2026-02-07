@@ -1,0 +1,1571 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LedgerFlow Studio - Complete Testing Guide</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #333;
+            line-height: 1.6;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
+            color: white;
+            padding: 60px 40px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 3em;
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+
+        .header p {
+            font-size: 1.2em;
+            opacity: 0.95;
+        }
+
+        .badge {
+            display: inline-block;
+            background: rgba(255,255,255,0.2);
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 0.9em;
+            margin-top: 15px;
+        }
+
+        .content {
+            padding: 40px;
+        }
+
+        .section {
+            margin-bottom: 50px;
+        }
+
+        .section-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 3px solid #3b82f6;
+        }
+
+        .section-number {
+            background: linear-gradient(135deg, #3b82f6, #2563eb);
+            color: white;
+            width: 50px;
+            height: 50px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5em;
+            font-weight: bold;
+            margin-right: 20px;
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+        }
+
+        .section-title {
+            font-size: 1.8em;
+            font-weight: 600;
+            color: #1e3a8a;
+        }
+
+        .step {
+            background: #f8fafc;
+            border-left: 4px solid #3b82f6;
+            padding: 25px;
+            margin-bottom: 20px;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .step:hover {
+            background: #eff6ff;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            transform: translateX(5px);
+        }
+
+        .step-title {
+            font-size: 1.3em;
+            font-weight: 600;
+            color: #1e40af;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+        }
+
+        .step-icon {
+            width: 30px;
+            height: 30px;
+            background: #3b82f6;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            margin-right: 12px;
+            font-size: 0.8em;
+        }
+
+        .command-block {
+            background: #1e293b;
+            color: #e2e8f0;
+            padding: 20px;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.95em;
+            margin: 15px 0;
+            overflow-x: auto;
+            position: relative;
+        }
+
+        .command-block::before {
+            content: 'PowerShell';
+            position: absolute;
+            top: 5px;
+            right: 10px;
+            font-size: 0.7em;
+            color: #64748b;
+            text-transform: uppercase;
+        }
+
+        .command-line {
+            margin: 8px 0;
+        }
+
+        .command-prompt {
+            color: #22d3ee;
+            margin-right: 8px;
+        }
+
+        .json-block {
+            background: #0f172a;
+            color: #cbd5e1;
+            padding: 20px;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+            margin: 15px 0;
+            overflow-x: auto;
+        }
+
+        .expected-result {
+            background: #ecfdf5;
+            border-left: 4px solid #10b981;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 5px;
+        }
+
+        .expected-result-title {
+            font-weight: 600;
+            color: #065f46;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+        }
+
+        .check-icon {
+            width: 20px;
+            height: 20px;
+            background: #10b981;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            margin-right: 8px;
+            font-size: 0.8em;
+        }
+
+        .warning {
+            background: #fef3c7;
+            border-left: 4px solid #f59e0b;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 5px;
+        }
+
+        .warning-title {
+            font-weight: 600;
+            color: #92400e;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+        }
+
+        .warning-icon {
+            width: 20px;
+            height: 20px;
+            background: #f59e0b;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            margin-right: 8px;
+            font-size: 0.8em;
+        }
+
+        .info-box {
+            background: #dbeafe;
+            border-left: 4px solid #3b82f6;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 5px;
+        }
+
+        .info-title {
+            font-weight: 600;
+            color: #1e40af;
+            margin-bottom: 8px;
+        }
+
+        .checklist {
+            list-style: none;
+            margin: 15px 0;
+        }
+
+        .checklist li {
+            padding: 10px 0;
+            padding-left: 35px;
+            position: relative;
+        }
+
+        .checklist li::before {
+            content: '□';
+            position: absolute;
+            left: 0;
+            font-size: 1.5em;
+            color: #3b82f6;
+        }
+
+        .url-link {
+            background: #3b82f6;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 6px;
+            text-decoration: none;
+            display: inline-block;
+            margin: 10px 0;
+            transition: all 0.3s ease;
+        }
+
+        .url-link:hover {
+            background: #2563eb;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        th {
+            background: #1e3a8a;
+            color: white;
+            padding: 15px;
+            text-align: left;
+            font-weight: 600;
+        }
+
+        td {
+            padding: 15px;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        tr:hover {
+            background: #f9fafb;
+        }
+
+        .status-badge {
+            padding: 5px 12px;
+            border-radius: 12px;
+            font-size: 0.85em;
+            font-weight: 600;
+        }
+
+        .status-success {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        .status-error {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .status-pending {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .footer {
+            background: #f8fafc;
+            padding: 40px;
+            text-align: center;
+            color: #64748b;
+            border-top: 1px solid #e2e8f0;
+        }
+
+        .footer-title {
+            font-size: 1.5em;
+            font-weight: 700;
+            color: #1e3a8a;
+            margin-bottom: 15px;
+        }
+
+        .key-value {
+            display: grid;
+            grid-template-columns: 200px 1fr;
+            gap: 15px;
+            margin: 10px 0;
+            padding: 10px;
+            background: #f8fafc;
+            border-radius: 5px;
+        }
+
+        .key {
+            font-weight: 600;
+            color: #475569;
+        }
+
+        .value {
+            font-family: 'Courier New', monospace;
+            color: #1e293b;
+        }
+
+        @media print {
+            body {
+                background: white;
+                padding: 0;
+            }
+            .container {
+                box-shadow: none;
+            }
+            .step:hover {
+                transform: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🚀 LedgerFlow Studio</h1>
+            <p>Complete Testing & Validation Guide</p>
+            <div class="badge">Production-Grade Financial Ledger System</div>
+        </div>
+
+        <div class="content">
+            <!-- PROJECT OVERVIEW -->
+            <div class="section" style="background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%); padding: 30px; border-radius: 12px; margin-bottom: 40px;">
+                <h2 style="color: #0369a1; margin-bottom: 15px;">📊 LedgerFlow Studio Overview</h2>
+                <p style="margin-bottom: 15px;"><strong>Purpose:</strong> Production-grade, immutable financial ledger system with cryptographic hash chaining, double-entry accounting, and ACID-compliant operations.</p>
+                
+                <h3 style="color: #0284c7; margin-top: 20px; margin-bottom: 10px;">🏗️ Architecture</h3>
+                <ul style="margin-left: 20px; margin-bottom: 15px;">
+                    <li><strong>Backend:</strong> NestJS 10.2.0 with TypeORM 0.3.17, JWT authentication, Passport strategies</li>
+                    <li><strong>Frontend:</strong> React 18.2.0 with TypeScript, Tailwind CSS, React Query, React Router v6</li>
+                    <li><strong>Database:</strong> PostgreSQL 16 with ACID transactions (SERIALIZABLE isolation)</li>
+                    <li><strong>DevOps:</strong> Docker Compose for local/prod deployment, GitHub Actions for CI/CD</li>
+                </ul>
+
+                <h3 style="color: #0284c7; margin-bottom: 10px;">🔑 Key Features</h3>
+                <ul style="margin-left: 20px;">
+                    <li>✅ Cryptographic hash chaining - SHA-256 prevents tampering</li>
+                    <li>✅ Double-entry bookkeeping - Every transaction has debit+credit</li>
+                    <li>✅ Immutable ledger - Entries cannot be modified, only reversed</li>
+                    <li>✅ Role-based access control - 4 roles (ADMIN, ACCOUNTANT, AUDITOR, VIEWER)</li>
+                    <li>✅ Audit trails - Complete compliance history</li>
+                    <li>✅ Account reconciliation - Multi-entity support with period tracking</li>
+                </ul>
+            </div>
+
+            <!-- SECTION 1: Pre-Testing Setup -->
+            <div class="section">
+                <div class="section-header">
+                    <div class="section-number">1</div>
+                    <div class="section-title">Pre-Testing Setup & Environment Validation</div>
+                </div>
+
+                <div class="step">
+                    <div class="step-title">
+                        <div class="step-icon">1.1</div>
+                        Verify Prerequisites
+                    </div>
+                    <p>Before starting, ensure all required tools are installed and properly configured.</p>
+                    
+                    <div class="command-block">
+<div class="command-line"><span class="command-prompt">PS></span> node --version</div>
+<div class="command-line"># Should return v20.x.x or higher</div>
+<div class="command-line"></div>
+<div class="command-line"><span class="command-prompt">PS></span> npm --version</div>
+<div class="command-line"># Should return 10.x.x or higher</div>
+<div class="command-line"></div>
+<div class="command-line"><span class="command-prompt">PS></span> docker --version</div>
+<div class="command-line"># Should return Docker version 20.x.x or higher</div>
+<div class="command-line"></div>
+<div class="command-line"><span class="command-prompt">PS></span> psql --version</div>
+<div class="command-line"># Should return PostgreSQL 16.x</div>
+                    </div>
+
+                    <div class="expected-result">
+                        <div class="expected-result-title">
+                            <div class="check-icon">✓</div>
+                            Expected Result
+                        </div>
+                        All commands return version numbers without errors. If any fail, install the missing tool before proceeding.
+                    </div>
+                </div>
+
+                <div class="step">
+                    <div class="step-title">
+                        <div class="step-icon">1.2</div>
+                        Database Setup & Verification
+                    </div>
+                    <p>Start PostgreSQL and create the database:</p>
+                    
+                    <div class="command-block">
+<div class="command-line"><span class="command-prompt">PS></span> cd LedgerFlow-Studio/infra</div>
+<div class="command-line"><span class="command-prompt">PS></span> docker-compose up -d postgres</div>
+<div class="command-line"></div>
+<div class="command-line"># Wait 10 seconds for PostgreSQL to start</div>
+<div class="command-line"><span class="command-prompt">PS></span> docker-compose logs postgres</div>
+                    </div>
+
+                    <div class="expected-result">
+                        <div class="expected-result-title">
+                            <div class="check-icon">✓</div>
+                            Expected Result
+                        </div>
+                        You should see: <code>"database system is ready to accept connections"</code>
+                    </div>
+
+                    <div class="info-box">
+                        <div class="info-title">💡 Verify Database Connectivity</div>
+                        <div class="command-block">
+<div class="command-line"><span class="command-prompt">PS></span> docker exec -it ledgerflow-db psql -U postgres</div>
+<div class="command-line">postgres=# \l</div>
+<div class="command-line"># Should show "ledgerflow" database</div>
+<div class="command-line">postgres=# \q</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="step">
+                    <div class="step-title">
+                        <div class="step-icon">1.3</div>
+                        Install Dependencies
+                    </div>
+                    
+                    <div class="command-block">
+<div class="command-line"># Backend dependencies</div>
+<div class="command-line"><span class="command-prompt">PS></span> cd ../backend</div>
+<div class="command-line"><span class="command-prompt">PS></span> npm install</div>
+<div class="command-line"></div>
+<div class="command-line"># Frontend dependencies</div>
+<div class="command-line"><span class="command-prompt">PS></span> cd ../frontend</div>
+<div class="command-line"><span class="command-prompt">PS></span> npm install</div>
+                    </div>
+
+                    <div class="warning">
+                        <div class="warning-title">
+                            <div class="warning-icon">!</div>
+                            Important
+                        </div>
+                        This may take 5-10 minutes depending on your internet connection. Watch for any peer dependency warnings but don't worry about them unless the install fails.
+                    </div>
+                </div>
+
+                <div class="step">
+                    <div class="step-title">
+                        <div class="step-icon">1.4</div>
+                        Environment Configuration
+                    </div>
+                    <p>Verify your <code>/backend/.env</code> file exists and contains:</p>
+                    
+                    <div class="key-value">
+                        <div class="key">NODE_ENV</div>
+                        <div class="value">development</div>
+                    </div>
+                    <div class="key-value">
+                        <div class="key">PORT</div>
+                        <div class="value">3001</div>
+                    </div>
+                    <div class="key-value">
+                        <div class="key">DB_HOST</div>
+                        <div class="value">localhost</div>
+                    </div>
+                    <div class="key-value">
+                        <div class="key">DB_PORT</div>
+                        <div class="value">5432</div>
+                    </div>
+                    <div class="key-value">
+                        <div class="key">DB_USERNAME</div>
+                        <div class="value">postgres</div>
+                    </div>
+                    <div class="key-value">
+                        <div class="key">DB_PASSWORD</div>
+                        <div class="value">postgres</div>
+                    </div>
+                    <div class="key-value">
+                        <div class="key">DB_NAME</div>
+                        <div class="value">ledgerflow</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SECTION 2: Application Startup -->
+            <div class="section">
+                <div class="section-header">
+                    <div class="section-number">2</div>
+                    <div class="section-title">Application Startup & Health Checks</div>
+                </div>
+
+                <div class="step">
+                    <div class="step-title">
+                        <div class="step-icon">2.1</div>
+                        Start Backend Server
+                    </div>
+                    
+                    <div class="command-block">
+<div class="command-line"><span class="command-prompt">PS></span> cd backend</div>
+<div class="command-line"><span class="command-prompt">PS></span> npm run start:dev</div>
+                    </div>
+
+                    <div class="expected-result">
+                        <div class="expected-result-title">
+                            <div class="check-icon">✓</div>
+                            Expected Console Output
+                        </div>
+                        <pre style="background: #f8fafc; padding: 15px; border-radius: 5px; overflow-x: auto;">
+[Nest] LOG [NestFactory] Starting Nest application...
+[Nest] LOG [InstanceLoader] AppModule dependencies initialized
+[Nest] LOG [InstanceLoader] TypeOrmModule dependencies initialized
+[Nest] LOG [InstanceLoader] ConfigModule dependencies initialized
+[Nest] LOG [RoutesResolver] LedgerController {/ledger}:
+[Nest] LOG [RouterExplorer] Mapped {/ledger/transaction, POST} route
+[Nest] LOG [RouterExplorer] Mapped {/ledger/entries, GET} route
+[Nest] LOG [NestApplication] Nest application successfully started
+🚀 LedgerFlow Studio API running on http://localhost:3001
+📚 API Documentation: http://localhost:3001/api/docs
+                        </pre>
+                    </div>
+
+                    <div class="warning">
+                        <div class="warning-title">
+                            <div class="warning-icon">!</div>
+                            Troubleshooting
+                        </div>
+                        <ul>
+                            <li>If you see <code>"ECONNREFUSED"</code> errors, ensure PostgreSQL is running</li>
+                            <li>If port 3001 is busy, change PORT in .env file</li>
+                            <li>If you see TypeORM errors, verify database credentials</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="step">
+                    <div class="step-title">
+                        <div class="step-icon">2.2</div>
+                        Verify API Documentation (Swagger)
+                    </div>
+                    <p>Open your browser and navigate to:</p>
+                    <a href="http://localhost:3001/api/docs" class="url-link" target="_blank">
+                        http://localhost:3001/api/docs
+                    </a>
+
+                    <div class="expected-result">
+                        <div class="expected-result-title">
+                            <div class="check-icon">✓</div>
+                            What You Should See
+                        </div>
+                        <ul class="checklist">
+                            <li>Swagger UI interface with "LedgerFlow Studio API" title</li>
+                            <li>Sections for: auth, ledger, audit, reconciliation, compliance</li>
+                            <li>All endpoints listed with GET/POST methods</li>
+                            <li>Green "Authorize" button at top right</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="step">
+                    <div class="step-title">
+                        <div class="step-icon">2.3</div>
+                        Start Frontend Application
+                    </div>
+                    <p>Open a NEW PowerShell terminal (keep backend running):</p>
+                    
+                    <div class="command-block">
+<div class="command-line"><span class="command-prompt">PS></span> cd frontend</div>
+<div class="command-line"><span class="command-prompt">PS></span> npm start</div>
+                    </div>
+
+                    <div class="expected-result">
+                        <div class="expected-result-title">
+                            <div class="check-icon">✓</div>
+                            Expected Result
+                        </div>
+                        <pre style="background: #f8fafc; padding: 15px; border-radius: 5px;">
+Compiled successfully!
+
+You can now view ledgerflow-frontend in the browser.
+
+  Local:            http://localhost:3000
+  On Your Network:  http://192.168.x.x:3000
+                        </pre>
+                        Browser should automatically open to <code>http://localhost:3000</code>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SECTION 3: Authentication Testing -->
+            <div class="section">
+                <div class="section-header">
+                    <div class="section-number">3</div>
+                    <div class="section-title">Authentication & Authorization Testing</div>
+                </div>
+
+                <div class="step">
+                    <div class="step-title">
+                        <div class="step-icon">3.1</div>
+                        Create Test User (via API)
+                    </div>
+                    <p>Use a REST client (Postman, Insomnia, or curl) to create a test user:</p>
+                    
+                    <div class="info-box">
+                        <div class="info-title">📡 API Request</div>
+                        <strong>POST</strong> <code>http://localhost:3001/auth/register</code>
+                    </div>
+
+                    <div class="json-block">
+{
+  "email": "admin@ledgerflow.com",
+  "password": "admin123",
+  "firstName": "Admin",
+  "lastName": "User"
+}
+                    </div>
+
+                    <div class="expected-result">
+                        <div class="expected-result-title">
+                            <div class="check-icon">✓</div>
+                            Expected Response (201 Created)
+                        </div>
+                        <div class="json-block">
+{
+  "id": "550e8400-e29b-41d4-a716-446655440000",
+  "email": "admin@ledgerflow.com",
+  "firstName": "Admin",
+  "lastName": "User",
+  "role": "VIEWER",
+  "isActive": true,
+  "createdAt": "2026-02-05T10:30:00.000Z",
+  "updatedAt": "2026-02-05T10:30:00.000Z"
+}
+                        </div>
+                    </div>
+                </div>
+
+                <div class="step">
+                    <div class="step-title">
+                        <div class="step-icon">3.2</div>
+                        Test Login via API
+                    </div>
+                    
+                    <div class="info-box">
+                        <div class="info-title">📡 API Request</div>
+                        <strong>POST</strong> <code>http://localhost:3001/auth/login</code>
+                    </div>
+
+                    <div class="json-block">
+{
+  "email": "admin@ledgerflow.com",
+  "password": "admin123"
+}
+                    </div>
+
+                    <div class="expected-result">
+                        <div class="expected-result-title">
+                            <div class="check-icon">✓</div>
+                            Expected Response (200 OK)
+                        </div>
+                        <div class="json-block">
+{
+  "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+  "user": {
+    "id": "550e8400-e29b-41d4-a716-446655440000",
+    "email": "admin@ledgerflow.com",
+    "firstName": "Admin",
+    "lastName": "User",
+    "role": "VIEWER"
+  }
+}
+                        </div>
+                        <strong>IMPORTANT:</strong> Copy the <code>access_token</code> - you'll need it for authenticated requests!
+                    </div>
+                </div>
+
+                <div class="step">
+                    <div class="step-title">
+                        <div class="step-icon">3.3</div>
+                        Test Frontend Login
+                    </div>
+                    <p>Navigate to <code>http://localhost:3000/login</code> in your browser.</p>
+
+                    <div class="info-box">
+                        <div class="info-title">🔐 Test Credentials</div>
+                        <div class="key-value">
+                            <div class="key">Email:</div>
+                            <div class="value">admin@ledgerflow.com</div>
+                        </div>
+                        <div class="key-value">
+                            <div class="key">Password:</div>
+                            <div class="value">admin123</div>
+                        </div>
+                    </div>
+
+                    <div class="expected-result">
+                        <div class="expected-result-title">
+                            <div class="check-icon">✓</div>
+                            Expected Result
+                        </div>
+                        <ul class="checklist">
+                            <li>Login form accepts credentials without errors</li>
+                            <li>User is redirected to dashboard (/) after login</li>
+                            <li>Navigation bar shows user's name in top right</li>
+                            <li>All menu items are visible (Dashboard, Ledger, Transactions, Audit)</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="step">
+                    <div class="step-title">
+                        <div class="step-icon">3.4</div>
+                        Update User Role to ADMIN (Database Direct)
+                    </div>
+                    <p>To test ledger creation, you need ADMIN or ACCOUNTANT role:</p>
+
+                    <div class="command-block">
+<div class="command-line"><span class="command-prompt">PS></span> docker exec -it ledgerflow-db psql -U postgres -d ledgerflow</div>
+<div class="command-line"></div>
+<div class="command-line">ledgerflow=# UPDATE users SET role = 'ADMIN' WHERE email = 'admin@ledgerflow.com';</div>
+<div class="command-line">ledgerflow=# SELECT email, role FROM users;</div>
+<div class="command-line">ledgerflow=# \q</div>
+                    </div>
+
+                    <div class="warning">
+                        <div class="warning-title">
+                            <div class="warning-icon">!</div>
+                            Important
+                        </div>
+                        After updating the role, log out and log back in to the frontend for the new role to take effect.
+                    </div>
+                </div>
+            </div>
+
+            <!-- SECTION 4: Ledger Operations Testing -->
+            <div class="section">
+                <div class="section-header">
+                    <div class="section-number">4</div>
+                    <div class="section-title">Core Ledger Operations Testing</div>
+                </div>
+
+                <div class="step">
+                    <div class="step-title">
+                        <div class="step-icon">4.1</div>
+                        Create Double-Entry Transaction
+                    </div>
+                    
+                    <div class="info-box">
+                        <div class="info-title">📡 API Request (Authenticated)</div>
+                        <strong>POST</strong> <code>http://localhost:3001/ledger/transaction</code><br>
+                        <strong>Headers:</strong> <code>Authorization: Bearer {your_access_token}</code>
+                    </div>
+
+                    <div class="json-block">
+{
+  "debitAccountId": "ACC-1001",
+  "creditAccountId": "ACC-2001",
+  "entityId": "ENTITY-001",
+  "amount": 15000.00,
+  "currency": "ZAR",
+  "description": "Initial customer payment",
+  "metadata": {
+    "invoiceNumber": "INV-2026-001",
+    "customerName": "Acme Corp"
+  }
+}
+                    </div>
+
+                    <div class="expected-result">
+                        <div class="expected-result-title">
+                            <div class="check-icon">✓</div>
+                            Expected Response (201 Created)
+                        </div>
+                        Returns an array with TWO entries (debit and credit):
+                        <div class="json-block">
+[
+  {
+    "id": "uuid-1",
+    "transactionId": "TXN-1707134400000-ABC123XYZ",
+    "accountId": "ACC-1001",
+    "type": "DEBIT",
+    "amount": "15000.00",
+    "hash": "a7f8d9e2c1b4...",
+    "previousHash": null,
+    "status": "POSTED"
+  },
+  {
+    "id": "uuid-2",
+    "transactionId": "TXN-1707134400000-ABC123XYZ",
+    "accountId": "ACC-2001",
+    "type": "CREDIT",
+    "amount": "15000.00",
+    "hash": "9e2c1b4a7f8d...",
+    "previousHash": "a7f8d9e2c1b4...",
+    "status": "POSTED"
+  }
+]
+                        </div>
+                    </div>
+
+                    <div class="info-box">
+                        <div class="info-title">🔍 Key Things to Verify</div>
+                        <ul class="checklist">
+                            <li>Both entries have the SAME transactionId</li>
+                            <li>Debit entry has previousHash = null (first entry)</li>
+                            <li>Credit entry's previousHash matches debit entry's hash</li>
+                            <li>Both amounts are identical</li>
+                            <li>Status is "POSTED" for both</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="step">
+                    <div class="step-title">
+                        <div class="step-icon">4.2</div>
+                        Create Multiple Transactions
+                    </div>
+                    <p>Create 3-5 more transactions with different amounts to build the hash chain:</p>
+
+                    <div class="json-block">
+// Transaction 2
+{
+  "debitAccountId": "ACC-1002",
+  "creditAccountId": "ACC-2001",
+  "entityId": "ENTITY-001",
+  "amount": 25000.00,
+  "description": "Equipment purchase"
+}
+
+// Transaction 3
+{
+  "debitAccountId": "ACC-1001",
+  "creditAccountId": "ACC-3001",
+  "entityId": "ENTITY-002",
+  "amount": 5000.00,
+  "description": "Service fee payment"
+}
+                    </div>
+
+                    <div class="expected-result">
+                        <div class="expected-result-title">
+                            <div class="check-icon">✓</div>
+                            What to Verify
+                        </div>
+                        Each transaction's debit entry should have a <code>previousHash</code> that matches the previous transaction's credit entry <code>hash</code>. This creates the immutable chain.
+                    </div>
+                </div>
+
+                <div class="step">
+                    <div class="step-title">
+                        <div class="step-icon">4.3</div>
+                        Verify Ledger Integrity
+                    </div>
+                    
+                    <div class="info-box">
+                        <div class="info-title">📡 API Request (Authenticated)</div>
+                        <strong>GET</strong> <code>http://localhost:3001/ledger/verify</code><br>
+                        <strong>Headers:</strong> <code>Authorization: Bearer {your_access_token}</code>
+                    </div>
+
+                    <div class="expected-result">
+                        <div class="expected-result-title">
+                            <div class="check-icon">✓</div>
+                            Expected Response (200 OK)
+                        </div>
+                        <div class="json-block">
+{
+  "valid": true,
+  "errors": []
+}
+                        </div>
+                    </div>
+
+                    <div class="info-box">
+                        <div class="info-title">💡 What This Tests</div>
+                        This endpoint verifies:
+                        <ul>
+                            <li>Every entry's hash is correctly calculated</li>
+                            <li>Every entry's previousHash matches the actual previous entry</li>
+                            <li>The entire chain is unbroken and tamper-proof</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="step">
+                    <div class="step-title">
+                        <div class="step-icon">4.4</div>
+                        Get Account Balance
+                    </div>
+                    
+                    <div class="info-box">
+                        <div class="info-title">📡 API Request</div>
+                        <strong>GET</strong> <code>http://localhost:3001/ledger/account/ACC-1001/balance?entityId=ENTITY-001</code><br>
+                        <strong>Headers:</strong> <code>Authorization: Bearer {your_access_token}</code>
+                    </div>
+
+                    <div class="expected-result">
+                        <div class="expected-result-title">
+                            <div class="check-icon">✓</div>
+                            Expected Response
+                        </div>
+                        <div class="json-block">
+{
+  "accountId": "ACC-1001",
+  "entityId": "ENTITY-001",
+  "balance": 10000.00
+}
+                        </div>
+                        <p style="margin-top: 10px;"><strong>Calculation:</strong> Credit (15000) - Debit (5000) = 10000</p>
+                    </div>
+                </div>
+
+                <div class="step">
+                    <div class="step-title">
+                        <div class="step-icon">4.5</div>
+                        Get Ledger Entries with Filters
+                    </div>
+                    
+                    <div class="info-box">
+                        <div class="info-title">📡 API Requests to Test</div>
+                    </div>
+
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Test Case</th>
+                                <th>Endpoint</th>
+                                <th>Expected Result</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>All entries</td>
+                                <td><code>/ledger/entries</code></td>
+                                <td>Returns all ledger entries</td>
+                            </tr>
+                            <tr>
+                                <td>By account</td>
+                                <td><code>/ledger/entries?accountId=ACC-1001</code></td>
+                                <td>Only entries for ACC-1001</td>
+                            </tr>
+                            <tr>
+                                <td>By entity</td>
+                                <td><code>/ledger/entries?entityId=ENTITY-001</code></td>
+                                <td>Only entries for ENTITY-001</td>
+                            </tr>
+                            <tr>
+                                <td>With pagination</td>
+                                <td><code>/ledger/entries?limit=5&offset=0</code></td>
+                                <td>First 5 entries only</td>
+                            </tr>
+                            <tr>
+                                <td>By transaction</td>
+                                <td><code>/ledger/entries?transactionId=TXN-xxx</code></td>
+                                <td>Both debit & credit for that transaction</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="step">
+                    <div class="step-title">
+                        <div class="step-icon">4.6</div>
+                        Transaction Reversal
+                    </div>
+                    <p>Test the reversal workflow (ADMIN only):</p>
+
+                    <div class="info-box">
+                        <div class="info-title">📡 API Request</div>
+                        <strong>POST</strong> <code>http://localhost:3001/ledger/transaction/{transactionId}/reverse</code><br>
+                        <strong>Headers:</strong> <code>Authorization: Bearer {your_access_token}</code>
+                    </div>
+
+                    <div class="json-block">
+{
+  "reason": "Customer requested refund due to duplicate payment"
+}
+                    </div>
+
+                    <div class="expected-result">
+                        <div class="expected-result-title">
+                            <div class="check-icon">✓</div>
+                            Expected Behavior
+                        </div>
+                        <ul class="checklist">
+                            <li>Creates two NEW entries with opposite debit/credit types</li>
+                            <li>Same amounts as original transaction</li>
+                            <li>Original entries are marked as <code>isReversed: true</code></li>
+                            <li>New entries have description prefixed with "REVERSAL:"</li>
+                            <li>Hash chain continues correctly</li>
+                        </ul>
+                    </div>
+
+                    <div class="warning">
+                        <div class="warning-title">
+                            <div class="warning-icon">!</div>
+                            Test Edge Cases
+                        </div>
+                        <ul>
+                            <li>Try reversing the same transaction twice (should fail with 409 Conflict)</li>
+                            <li>Try reversing with invalid transactionId (should fail with 400)</li>
+                            <li>Verify account balance updates correctly after reversal</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SECTION 5: Frontend Testing -->
+            <div class="section">
+                <div class="section-header">
+                    <div class="section-number">5</div>
+                    <div class="section-title">Frontend User Interface Testing</div>
+                </div>
+
+                <div class="step">
+                    <div class="step-title">
+                        <div class="step-icon">5.1</div>
+                        Dashboard Page Testing
+                    </div>
+                    <p>Navigate to <code>http://localhost:3000/</code></p>
+
+                    <div class="expected-result">
+                        <div class="expected-result-title">
+                            <div class="check-icon">✓</div>
+                            Visual Checklist
+                        </div>
+                        <ul class="checklist">
+                            <li>Four stat cards display (Transactions, Integrity, Audits, Entities)</li>
+                            <li>System Status section shows all items as "Verified" or "Healthy"</li>
+                            <li>No console errors in browser DevTools (F12)</li>
+                            <li>Navigation menu is visible and clickable</li>
+                            <li>User name appears in top right corner</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="step">
+                    <div class="step-title">
+                        <div class="step-icon">5.2</div>
+                        Transactions Page - Create Transaction
+                    </div>
+                    <p>Navigate to <code>http://localhost:3000/transactions</code></p>
+
+                    <div class="info-box">
+                        <div class="info-title">🧪 Test Steps</div>
+                        <ol style="margin-left: 20px; margin-top: 10px;">
+                            <li>Click "New Transaction" button</li>
+                            <li>Fill in the form:
+                                <ul style="margin-left: 20px; margin-top: 5px;">
+                                    <li>Debit Account: <code>ACC-TEST-001</code></li>
+                                    <li>Credit Account: <code>ACC-TEST-002</code></li>
+                                    <li>Entity ID: <code>ENTITY-TEST</code></li>
+                                    <li>Amount: <code>10000</code></li>
+                                    <li>Description: <code>Frontend test transaction</code></li>
+                                </ul>
+                            </li>
+                            <li>Click "Create Transaction"</li>
+                        </ol>
+                    </div>
+
+                    <div class="expected-result">
+                        <div class="expected-result-title">
+                            <div class="check-icon">✓</div>
+                            Expected Behavior
+                        </div>
+                        <ul class="checklist">
+                            <li>Modal closes automatically</li>
+                            <li>No error messages appear</li>
+                            <li>Form resets to empty state</li>
+                            <li>Check backend logs - should show transaction creation</li>
+                        </ul>
+                    </div>
+
+                    <div class="warning">
+                        <div class="warning-title">
+                            <div class="warning-icon">!</div>
+                            Known Limitation
+                        </div>
+                        The transactions table currently shows mock data. You'll need to add React Query to fetch real transactions from the API. However, the transaction IS created in the database - verify via API call to <code>/ledger/entries</code>.
+                    </div>
+                </div>
+
+                <div class="step">
+                    <div class="step-title">
+                        <div class="step-icon">5.3</div>
+                        Ledger Page Testing
+                    </div>
+                    <p>Navigate to <code>http://localhost:3000/ledger</code></p>
+
+                    <div class="expected-result">
+                        <div class="expected-result-title">
+                            <div class="check-icon">✓</div>
+                            Visual Verification
+                        </div>
+                        <ul class="checklist">
+                            <li>Ledger entries cards are displayed</li>
+                            <li>Each entry shows hash and previous hash</li>
+                            <li>Status badges are visible</li>
+                            <li>Cryptographic Hash Chain header is prominent</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="step">
+                    <div class="step-title">
+                        <div class="step-icon">5.4</div>
+                        Audit Page Testing
+                    </div>
+                    <p>Navigate to <code>http://localhost:3000/audit</code></p>
+
+                    <div class="expected-result">
+                        <div class="expected-result-title">
+                            <div class="check-icon">✓</div>
+                            Visual Verification
+                        </div>
+                        <ul class="checklist">
+                            <li>Integrity Check panel displays with status items</li>
+                            <li>Compliance Reports panel shows report list</li>
+                            <li>All status indicators show appropriate icons</li>
+                            <li>Page layout is clean and professional</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="step">
+                    <div class="step-title">
+                        <div class="step-icon">5.5</div>
+                        Logout & Session Testing
+                    </div>
+
+                    <div class="info-box">
+                        <div class="info-title">🧪 Test Sequence</div>
+                        <ol style="margin-left: 20px; margin-top: 10px;">
+                            <li>Click "Logout" button in top right</li>
+                            <li>Verify redirect to login page</li>
+                            <li>Try to access <code>/dashboard</code> directly</li>
+                            <li>Verify redirect back to login</li>
+                            <li>Login again and verify access is restored</li>
+                        </ol>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SECTION 6: Advanced Testing -->
+            <div class="section">
+                <div class="section-header">
+                    <div class="section-number">6</div>
+                    <div class="section-title">Advanced Security & Edge Case Testing</div>
+                </div>
+
+                <div class="step">
+                    <div class="step-title">
+                        <div class="step-icon">6.1</div>
+                        Test Authentication Guards
+                    </div>
+
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Test</th>
+                                <th>How to Test</th>
+                                <th>Expected Result</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>No token</td>
+                                <td>Call any ledger endpoint without Authorization header</td>
+                                <td><span class="status-badge status-error">401 Unauthorized</span></td>
+                            </tr>
+                            <tr>
+                                <td>Invalid token</td>
+                                <td>Use <code>Authorization: Bearer invalid-token-xyz</code></td>
+                                <td><span class="status-badge status-error">401 Unauthorized</span></td>
+                            </tr>
+                            <tr>
+                                <td>Expired token</td>
+                                <td>Use a token older than 24 hours</td>
+                                <td><span class="status-badge status-error">401 Unauthorized</span></td>
+                            </tr>
+                            <tr>
+                                <td>Wrong role</td>
+                                <td>VIEWER user tries to create transaction</td>
+                                <td><span class="status-badge status-error">403 Forbidden</span></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="step">
+                    <div class="step-title">
+                        <div class="step-icon">6.2</div>
+                        Test Input Validation
+                    </div>
+
+                    <div class="info-box">
+                        <div class="info-title">🧪 Invalid Input Tests</div>
+                    </div>
+
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Invalid Input</th>
+                                <th>Expected Error</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Negative amount: <code>-5000</code></td>
+                                <td>400 Bad Request: "Amount must be positive"</td>
+                            </tr>
+                            <tr>
+                                <td>Zero amount: <code>0</code></td>
+                                <td>400 Bad Request: "Amount must be positive"</td>
+                            </tr>
+                            <tr>
+                                <td>Missing required fields</td>
+                                <td>400 Bad Request: Validation error</td>
+                            </tr>
+                            <tr>
+                                <td>Invalid email format</td>
+                                <td>400 Bad Request: Email validation</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="step">
+                    <div class="step-title">
+                        <div class="step-icon">6.3</div>
+                        Test Concurrent Transactions (ACID)
+                    </div>
+                    <p>This tests the database SERIALIZABLE isolation level:</p>
+
+                    <div class="info-box">
+                        <div class="info-title">🧪 Concurrent Test</div>
+                        <ol style="margin-left: 20px; margin-top: 10px;">
+                            <li>Open Postman or create a simple script</li>
+                            <li>Send 5 transactions simultaneously to the same accounts</li>
+                            <li>All should succeed without hash chain corruption</li>
+                            <li>Run <code>/ledger/verify</code> - should still return <code>valid: true</code></li>
+                        </ol>
+                    </div>
+
+                    <div class="expected-result">
+                        <div class="expected-result-title">
+                            <div class="check-icon">✓</div>
+                            Expected Result
+                        </div>
+                        All transactions complete successfully, and the hash chain remains valid. The SERIALIZABLE isolation prevents race conditions.
+                    </div>
+                </div>
+
+                <div class="step">
+                    <div class="step-title">
+                        <div class="step-icon">6.4</div>
+                        Test Database Integrity (Tamper Detection)
+                    </div>
+                    <p>Manually tamper with the database to test integrity verification:</p>
+
+                    <div class="command-block">
+<div class="command-line"><span class="command-prompt">PS></span> docker exec -it ledgerflow-db psql -U postgres -d ledgerflow</div>
+<div class="command-line"></div>
+<div class="command-line">-- Tamper with an amount</div>
+<div class="command-line">ledgerflow=# UPDATE ledger_entries SET amount = 99999.99 WHERE id = (SELECT id FROM ledger_entries LIMIT 1);</div>
+<div class="command-line"></div>
+<div class="command-line">ledgerflow=# \q</div>
+                    </div>
+
+                    <div class="info-box">
+                        <div class="info-title">📡 Now test integrity</div>
+                        <strong>GET</strong> <code>http://localhost:3001/ledger/verify</code>
+                    </div>
+
+                    <div class="expected-result">
+                        <div class="expected-result-title">
+                            <div class="check-icon">✓</div>
+                            Expected Response
+                        </div>
+                        <div class="json-block">
+{
+  "valid": false,
+  "errors": [
+    "Hash mismatch at entry 550e8400-..."
+  ]
+}
+                        </div>
+                        This proves the tamper detection works! <strong>Restore your database</strong> by dropping and recreating it, or by restoring from backup.
+                    </div>
+                </div>
+            </div>
+
+            <!-- SECTION 7: Performance Testing -->
+            <div class="section">
+                <div class="section-header">
+                    <div class="section-number">7</div>
+                    <div class="section-title">Performance & Load Testing</div>
+                </div>
+
+                <div class="step">
+                    <div class="step-title">
+                        <div class="step-icon">7.1</div>
+                        Create Bulk Transactions
+                    </div>
+                    <p>Test system performance with volume:</p>
+
+                    <div class="info-box">
+                        <div class="info-title">💡 Simple Bulk Test Script (Node.js)</div>
+                    </div>
+
+                    <div class="command-block">
+<div class="command-line">// bulk-test.js</div>
+<div class="command-line">const axios = require('axios');</div>
+<div class="command-line"></div>
+<div class="command-line">const token = 'YOUR_ACCESS_TOKEN';</div>
+<div class="command-line">const API = 'http://localhost:3001';</div>
+<div class="command-line"></div>
+<div class="command-line">async function createBulkTransactions(count) {</div>
+<div class="command-line">  for (let i = 0; i < count; i++) {</div>
+<div class="command-line">    await axios.post(`${API}/ledger/transaction`, {</div>
+<div class="command-line">      debitAccountId: `ACC-${i}`,</div>
+<div class="command-line">      creditAccountId: `ACC-${i+1000}`,</div>
+<div class="command-line">      entityId: 'LOAD-TEST',</div>
+<div class="command-line">      amount: Math.random() * 10000,</div>
+<div class="command-line">      description: `Load test transaction ${i}`</div>
+<div class="command-line">    }, {</div>
+<div class="command-line">      headers: { Authorization: `Bearer ${token}` }</div>
+<div class="command-line">    });</div>
+<div class="command-line">    console.log(`Created transaction ${i+1}/${count}`);</div>
+<div class="command-line">  }</div>
+<div class="command-line">}</div>
+<div class="command-line"></div>
+<div class="command-line">createBulkTransactions(100);</div>
+                    </div>
+
+                    <div class="expected-result">
+                        <div class="expected-result-title">
+                            <div class="check-icon">✓</div>
+                            Performance Benchmarks
+                        </div>
+                        <ul>
+                            <li><strong>100 transactions:</strong> Should complete in under 30 seconds</li>
+                            <li><strong>Integrity check:</strong> Should verify in under 2 seconds</li>
+                            <li><strong>Balance calculation:</strong> Should complete in under 1 second</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="step">
+                    <div class="step-title">
+                        <div class="step-icon">7.2</div>
+                        Query Performance Testing
+                    </div>
+
+                    <div class="info-box">
+                        <div class="info-title">📊 Performance Tests</div>
+                    </div>
+
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Query Type</th>
+                                <th>Endpoint</th>
+                                <th>Target Time</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Get all entries</td>
+                                <td><code>/ledger/entries?limit=100</code></td>
+                                <td>&lt; 500ms</td>
+                            </tr>
+                            <tr>
+                                <td>Filter by account</td>
+                                <td><code>/ledger/entries?accountId=ACC-1</code></td>
+                                <td>&lt; 300ms</td>
+                            </tr>
+                            <tr>
+                                <td>Account balance</td>
+                                <td><code>/ledger/account/ACC-1/balance</code></td>
+                                <td>&lt; 200ms</td>
+                            </tr>
+                            <tr>
+                                <td>Integrity verification</td>
+                                <td><code>/ledger/verify</code></td>
+                                <td>&lt; 2000ms (1000 entries)</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- SECTION 8: Final Validation -->
+            <div class="section">
+                <div class="section-header">
+                    <div class="section-number">8</div>
+                    <div class="section-title">Final System Validation Checklist</div>
+                </div>
+
+                <div class="step">
+                    <div class="step-title">
+                        <div class="step-icon">✓</div>
+                        Complete System Checklist
+                    </div>
+
+                    <ul class="checklist">
+                        <li>✅ Database connection is stable and persistent</li>
+                        <li>✅ Backend server starts without errors</li>
+                        <li>✅ Frontend application loads correctly</li>
+                        <li>✅ Swagger documentation is accessible at /api/docs</li>
+                        <li>✅ User registration works via API</li>
+                        <li>✅ User login works via API and frontend</li>
+                        <li>✅ JWT authentication is enforced on protected routes</li>
+                        <li>✅ RBAC (Role-Based Access Control) prevents unauthorized actions</li>
+                        <li>✅ Double-entry transactions create two balanced entries</li>
+                        <li>✅ Hash chaining is working correctly</li>
+                        <li>✅ Ledger integrity verification passes</li>
+                        <li>✅ Transaction reversal creates offsetting entries</li>
+                        <li>✅ Account balance calculation is accurate</li>
+                        <li>✅ Query filters work correctly (account, entity, date range)</li>
+                        <li>✅ Concurrent transactions maintain ACID compliance</li>
+                        <li>✅ Tamper detection identifies modified entries</li>
+                        <li>✅ Input validation rejects invalid data</li>
+                        <li>✅ Frontend can create transactions</li>
+                        <li>✅ Frontend session management works (login/logout)</li>
+                        <li>✅ All frontend pages render without console errors</li>
+                    </ul>
+                </div>
+
+                <div class="step">
+                    <div class="step-title">
+                        <div class="step-icon">📊</div>
+                        Database Inspection
+                    </div>
+                    <p>Final verification of database state:</p>
+
+                    <div class="command-block">
+<div class="command-line"><span class="command-prompt">PS></span> docker exec -it ledgerflow-db psql -U postgres -d ledgerflow</div>
+<div class="command-line"></div>
+<div class="command-line">-- View all tables</div>
+<div class="command-line">ledgerflow=# \dt</div>
+<div class="command-line"></div>
+<div class="command-line">-- Count ledger entries</div>
+<div class="command-line">ledgerflow=# SELECT COUNT(*) FROM ledger_entries;</div>
+<div class="command-line"></div>
+<div class="command-line">-- View sample entries with hash chain</div>
+<div class="command-line">ledgerflow=# SELECT id, transaction_id, type, amount, </div>
+<div class="command-line">             LEFT(hash, 12) as hash, </div>
+<div class="command-line">             LEFT(previous_hash, 12) as prev_hash,</div>
+<div class="command-line">             status FROM ledger_entries </div>
+<div class="command-line">             ORDER BY timestamp LIMIT 10;</div>
+<div class="command-line"></div>
+<div class="command-line">-- Check user roles</div>
+<div class="command-line">ledgerflow=# SELECT email, role, is_active FROM users;</div>
+<div class="command-line"></div>
+<div class="command-line">ledgerflow=# \q</div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <div class="footer">
+            <div class="footer-title">🎉 Testing Complete & System Ready!</div>
+            <p style="margin: 20px 0; font-size: 1.1em;">Comprehensive testing & verification documentation available:</p>
+            
+            <div style="background: #f0f9ff; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #0369a1;">
+                <p style="margin-bottom: 15px;"><strong>📖 Full Testing Guide: </strong><code>TESTING_AND_VERIFICATION.md</code></p>
+                <p style="margin-bottom: 10px;">Complete guide includes:</p>
+                <ul style="margin-left: 20px; text-align: left;">
+                    <li>✅ Step-by-step environment setup</li>
+                    <li>✅ Local development configuration</li>
+                    <li>✅ Docker Compose production deployment</li>
+                    <li>✅ Database seeding & default users</li>
+                    <li>✅ Authentication testing (login, JWT validation)</li>
+                    <li>✅ Core feature testing (double-entry, hash chain, reversals)</li>
+                    <li>✅ Security testing (SQL injection, RBAC, CORS)</li>
+                    <li>✅ Performance benchmarking</li>
+                    <li>✅ Error handling & edge cases</li>
+                    <li>✅ Production verification checklist</li>
+                    <li>✅ Troubleshooting guide</li>
+                </ul>
+            </div>
+
+            <p style="margin: 20px 0;">You've successfully tested a production-grade financial ledger system.</p>
+            <p style="margin: 10px 0;">This demonstrates:</p>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 15px; margin: 20px 0; text-align: left;">
+                <div style="background: white; padding: 15px; border-radius: 8px; border-left: 4px solid #3b82f6;">
+                    <strong>🏗️ Enterprise Architecture</strong><br>
+                    <span style="font-size: 0.9em; color: #64748b;">NestJS, PostgreSQL, TypeORM</span>
+                </div>
+                <div style="background: white; padding: 15px; border-radius: 8px; border-left: 4px solid #10b981;">
+                    <strong>🔐 Security Excellence</strong><br>
+                    <span style="font-size: 0.9em; color: #64748b;">JWT, RBAC, Hash Chaining</span>
+                </div>
+                <div style="background: white; padding: 15px; border-radius: 8px; border-left: 4px solid #f59e0b;">
+                    <strong>💰 Financial Integrity</strong><br>
+                    <span style="font-size: 0.9em; color: #64748b;">ACID, Double-Entry, Immutability</span>
+                </div>
+                <div style="background: white; padding: 15px; border-radius: 8px; border-left: 4px solid #8b5cf6;">
+                    <strong>🎨 Full-Stack Mastery</strong><br>
+                    <span style="font-size: 0.9em; color: #64748b;">React, TypeScript, Tailwind</span>
+                </div>
+            </div>
+            <p style="margin-top: 30px; font-size: 1.1em; color: #1e3a8a; font-weight: 600;">
+                This is the kind of project that makes recruiters say: "This guy is NOT normal." 🔥
+            </p>
+        </div>
+    </div>
+</body>
+</html>

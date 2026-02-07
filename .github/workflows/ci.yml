@@ -1,0 +1,176 @@
+name: 🚀 LedgerFlow Studio CI/CD Pipeline
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
+
+jobs:
+  # Backend testing
+  test-backend:
+    runs-on: ubuntu-latest
+    name: Backend Tests
+
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: ledgerflow_test
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: 'backend/package-lock.json'
+
+      - name: Install backend dependencies
+        run: |
+          cd backend
+          npm ci
+
+      - name: Lint backend code
+        run: |
+          cd backend
+          npm run lint
+
+      - name: Build backend
+        run: |
+          cd backend
+          npm run build
+
+      - name: Run backend tests
+        run: |
+          cd backend
+          npm test
+        env:
+          DB_HOST: localhost
+          DB_PORT: 5432
+          DB_USERNAME: postgres
+          DB_PASSWORD: postgres
+          DB_NAME: ledgerflow_test
+          NODE_ENV: test
+
+  # Frontend testing
+  test-frontend:
+    runs-on: ubuntu-latest
+    name: Frontend Tests
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: 'frontend/package-lock.json'
+
+      - name: Install frontend dependencies
+        run: |
+          cd frontend
+          npm ci
+
+      - name: Build frontend
+        run: |
+          cd frontend
+          npm run build
+        env:
+          REACT_APP_API_URL: http://localhost:3001
+          CI: true
+
+  # Build Docker images
+  build-docker:
+    needs: [ test-backend, test-frontend ]
+    runs-on: ubuntu-latest
+    name: Build Docker Images
+    permissions:
+      contents: read
+      packages: write
+
+    if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop')
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push backend image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./backend
+          push: true
+          tags: |
+            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-backend:${{ github.sha }}
+            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-backend:latest
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Build and push frontend image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./frontend
+          push: true
+          tags: |
+            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-frontend:${{ github.sha }}
+            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-frontend:latest
+          build-args: |
+            REACT_APP_API_URL=http://api.ledgerflow.studio
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  # Code quality
+  code-quality:
+    runs-on: ubuntu-latest
+    name: Code Quality Checks
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Check for security vulnerabilities
+        run: |
+          cd backend
+          npm audit --audit-level=moderate || true
+          cd ../frontend
+          npm audit --audit-level=moderate || true
+
+  # Notify on success
+  notify-success:
+    needs: [ test-backend, test-frontend, code-quality ]
+    runs-on: ubuntu-latest
+    name: Success Notification
+    if: success()
+
+    steps:
+      - name: Notify success
+        run: echo "✅ LedgerFlow Studio CI/CD pipeline passed!"
