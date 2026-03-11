@@ -5,52 +5,52 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
   Index,
-} from 'typeorm';
+} from "typeorm";
 
 export enum UserRole {
-  ADMIN = 'ADMIN',
-  ACCOUNTANT = 'ACCOUNTANT',
-  AUDITOR = 'AUDITOR',
-  VIEWER = 'VIEWER',
+  ADMIN = "ADMIN",
+  ACCOUNTANT = "ACCOUNTANT",
+  AUDITOR = "AUDITOR",
+  VIEWER = "VIEWER",
 }
 
 /**
  * User entity - represents system users with role-based access control
  * All passwords are hashed with bcrypt before storage
  */
-@Entity('users')
-@Index(['email'], { unique: true })
-@Index(['isActive'], { where: '"isActive" = true' })
+@Entity("users")
+@Index(["email"], { unique: true })
+@Index(["isActive"], { where: '"isActive" = true' })
 export class User {
-  @PrimaryGeneratedColumn('uuid')
+  @PrimaryGeneratedColumn("uuid")
   id: string;
 
-  @Column({ type: 'varchar', length: 255, unique: true })
+  @Column({ type: "varchar", length: 255, unique: true })
   email: string;
 
-  @Column({ type: 'varchar', length: 255 })
+  @Column({ type: "varchar", length: 255 })
   password: string;
 
-  @Column({ type: 'varchar', length: 100 })
+  @Column({ type: "varchar", length: 100 })
   firstName: string;
 
-  @Column({ type: 'varchar', length: 100 })
+  @Column({ type: "varchar", length: 100 })
   lastName: string;
 
   @Column({
-    type: 'enum',
+    type: "enum",
     enum: UserRole,
     default: UserRole.VIEWER,
   })
   role: UserRole;
 
-  @Column({ type: 'boolean', default: true })
+  @Column({ type: "boolean", default: true })
   isActive: boolean;
 
-  @CreateDateColumn({ type: 'timestamp with time zone' })
+  @CreateDateColumn({ type: "timestamp with time zone" })
   createdAt: Date;
 
-  @UpdateDateColumn({ type: 'timestamp with time zone' })
+  @UpdateDateColumn({ type: "timestamp with time zone" })
   updatedAt: Date;
 
   // Helper methods

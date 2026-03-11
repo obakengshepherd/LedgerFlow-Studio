@@ -1,14 +1,19 @@
-import React, { ReactNode } from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { AuthProvider, useAuth } from './contexts/AuthContext';
-import Login from './pages/Login';
-import Dashboard from './pages/Dashboard';
-import Ledger from './pages/Ledger';
-import Transactions from './pages/Transactions';
-import Audit from './pages/Audit';
-import Reconciliation from './pages/Reconciliation';
-import Layout from './components/Layout';
+import React, { ReactNode } from "react";
+import {
+  BrowserRouter as Router,
+  Routes,
+  Route,
+  Navigate,
+} from "react-router-dom";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { AuthProvider, useAuth } from "./contexts/AuthContext";
+import Login from "./pages/Login";
+import Dashboard from "./pages/Dashboard";
+import Ledger from "./pages/Ledger";
+import Transactions from "./pages/Transactions";
+import Audit from "./pages/Audit";
+import Reconciliation from "./pages/Reconciliation";
+import Layout from "./components/Layout";
 
 const queryClient = new QueryClient({
   defaultOptions: {

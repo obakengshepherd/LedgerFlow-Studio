@@ -1,9 +1,19 @@
-import { Injectable, BadRequestException, ConflictException, NotFoundException, InternalServerErrorException } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, DataSource } from 'typeorm';
-import { LedgerEntry, TransactionType, TransactionStatus } from './entities/ledger-entry.entity';
-import { createHash } from 'crypto';
-import { v4 as uuidv4 } from 'crypto';
+import {
+  Injectable,
+  BadRequestException,
+  ConflictException,
+  NotFoundException,
+  InternalServerErrorException,
+} from "@nestjs/common";
+import { InjectRepository } from "@nestjs/typeorm";
+import { Repository, DataSource } from "typeorm";
+import {
+  LedgerEntry,
+  TransactionType,
+  TransactionStatus,
+} from "./entities/ledger-entry.entity";
+import { createHash } from "crypto";
+import { v4 as uuidv4 } from "crypto";
 
 export interface CreateLedgerEntryDto {
   accountId: string;
@@ -46,7 +56,10 @@ export class LedgerService {
    * Generate SHA-256 hash for ledger entry
    * Hash includes: transactionId, accountId, type, amount, timestamp, previousHash
    */
-  private generateHash(entry: Partial<LedgerEntry>, previousHash: string | null): string {
+  private generateHash(
+    entry: Partial<LedgerEntry>,
+    previousHash: string | null,
+  ): string {
     const data = {
       transactionId: entry.transactionId,
       accountId: entry.accountId,
@@ -55,12 +68,10 @@ export class LedgerService {
       amount: entry.amount,
       currency: entry.currency,
       timestamp: entry.timestamp?.toISOString(),
-      previousHash: previousHash || 'GENESIS_BLOCK',
+      previousHash: previousHash || "GENESIS_BLOCK",
     };
 
-    return createHash('sha256')
-      .update(JSON.stringify(data))
-      .digest('hex');
+    return createHash("sha256").update(JSON.stringify(data)).digest("hex");
   }
 
   /**
@@ -70,8 +81,8 @@ export class LedgerService {
   private async getLastHash(): Promise<string | null> {
     const lastEntry = await this.ledgerRepository.findOne({
       where: {},
-      order: { timestamp: 'DESC' },
-      select: ['hash'],
+      order: { timestamp: "DESC" },
+      select: ["hash"],
     });
 
     return lastEntry?.hash || null;
@@ -85,16 +96,18 @@ export class LedgerService {
   async createDoubleEntry(dto: CreateDoubleEntryDto): Promise<LedgerEntry[]> {
     // Validation
     if (dto.amount <= 0) {
-      throw new BadRequestException('Amount must be positive');
+      throw new BadRequestException("Amount must be positive");
     }
 
     if (dto.debitAccountId === dto.creditAccountId) {
-      throw new BadRequestException('Debit and credit accounts must be different');
+      throw new BadRequestException(
+        "Debit and credit accounts must be different",
+      );
     }
 
     const queryRunner = this.dataSource.createQueryRunner();
     await queryRunner.connect();
-    await queryRunner.startTransaction('SERIALIZABLE');
+    await queryRunner.startTransaction("SERIALIZABLE");
 
     try {
       // Generate transaction ID if not provided
@@ -111,7 +124,7 @@ export class LedgerService {
         entityId: dto.entityId,
         type: TransactionType.DEBIT,
         amount: dto.amount,
-        currency: dto.currency || 'ZAR',
+        currency: dto.currency || "ZAR",
         description: dto.description,
         metadata: dto.metadata || {},
         timestamp,
@@ -134,7 +147,7 @@ export class LedgerService {
         entityId: dto.entityId,
         type: TransactionType.CREDIT,
         amount: dto.amount,
-        currency: dto.currency || 'ZAR',
+        currency: dto.currency || "ZAR",
         description: dto.description,
         metadata: dto.metadata || {},
         timestamp,
@@ -181,20 +194,20 @@ export class LedgerService {
   ): Promise<LedgerEntry[]> {
     const originalEntries = await this.ledgerRepository.find({
       where: { transactionId },
-      order: { timestamp: 'ASC' },
+      order: { timestamp: "ASC" },
     });
 
     if (originalEntries.length === 0) {
-      throw new NotFoundException('Transaction not found');
+      throw new NotFoundException("Transaction not found");
     }
 
     if (originalEntries.some((e) => e.isReversed)) {
-      throw new ConflictException('Transaction already reversed');
+      throw new ConflictException("Transaction already reversed");
     }
 
     const queryRunner = this.dataSource.createQueryRunner();
     await queryRunner.connect();
-    await queryRunner.startTransaction('SERIALIZABLE');
+    await queryRunner.startTransaction("SERIALIZABLE");
 
     try {
       const reversalId = this.generateTransactionId();
@@ -208,10 +221,13 @@ export class LedgerService {
           accountId: original.accountId,
           entityId: original.entityId,
           // Flip the type: debit becomes credit, credit becomes debit
-          type: original.type === TransactionType.DEBIT ? TransactionType.CREDIT : TransactionType.DEBIT,
+          type:
+            original.type === TransactionType.DEBIT
+              ? TransactionType.CREDIT
+              : TransactionType.DEBIT,
           amount: original.amount,
           currency: original.currency,
-          description: `REVERSAL: ${original.description || 'Transaction reversed'}`,
+          description: `REVERSAL: ${original.description || "Transaction reversed"}`,
           metadata: {
             ...original.metadata,
             reversalOf: original.id,
@@ -224,7 +240,10 @@ export class LedgerService {
         });
 
         // Calculate hash
-        reversalEntry.hash = this.generateHash(reversalEntry, currentPreviousHash);
+        reversalEntry.hash = this.generateHash(
+          reversalEntry,
+          currentPreviousHash,
+        );
 
         // Save reversal entry
         const saved = await queryRunner.manager.save(reversalEntry);
@@ -263,7 +282,7 @@ export class LedgerService {
   }> {
     try {
       const entries = await this.ledgerRepository.find({
-        order: { timestamp: 'ASC' },
+        order: { timestamp: "ASC" },
       });
 
       const errors: string[] = [];
@@ -283,7 +302,9 @@ export class LedgerService {
         // Verify chain continuity
         if (i === 0 && entry.previousHash !== null) {
           // First entry should have no previous hash
-          errors.push(`First entry should have no previousHash, but has: ${entry.previousHash}`);
+          errors.push(
+            `First entry should have no previousHash, but has: ${entry.previousHash}`,
+          );
         } else if (i > 0 && entry.previousHash !== previousHash) {
           errors.push(
             `Chain broken at entry ${i + 1} (${entry.id}): previousHash doesn't match chain`,
@@ -318,25 +339,27 @@ export class LedgerService {
   ): Promise<number> {
     try {
       let query = this.ledgerRepository
-        .createQueryBuilder('entry')
+        .createQueryBuilder("entry")
         .select(
           `SUM(CASE WHEN entry.type = :credit THEN entry.amount ELSE -entry.amount END)`,
-          'balance',
+          "balance",
         )
-        .where('entry.accountId = :accountId', { accountId })
-        .andWhere('entry.entityId = :entityId', { entityId })
-        .andWhere('entry.status = :status', { status: TransactionStatus.POSTED })
-        .andWhere('entry.isReversed = :reversed', { reversed: false });
+        .where("entry.accountId = :accountId", { accountId })
+        .andWhere("entry.entityId = :entityId", { entityId })
+        .andWhere("entry.status = :status", {
+          status: TransactionStatus.POSTED,
+        })
+        .andWhere("entry.isReversed = :reversed", { reversed: false });
 
       if (asOfDate) {
-        query = query.andWhere('entry.timestamp <= :asOfDate', { asOfDate });
+        query = query.andWhere("entry.timestamp <= :asOfDate", { asOfDate });
       }
 
-      query = query.setParameter('credit', TransactionType.CREDIT);
+      query = query.setParameter("credit", TransactionType.CREDIT);
 
       const result = await query.getRawOne();
 
-      return parseFloat(result?.balance || '0');
+      return parseFloat(result?.balance || "0");
     } catch (error) {
       throw new InternalServerErrorException(
         `Failed to calculate balance: ${error.message}`,
@@ -359,39 +382,47 @@ export class LedgerService {
     offset?: number;
   }): Promise<{ entries: LedgerEntry[]; total: number }> {
     try {
-      const query = this.ledgerRepository.createQueryBuilder('entry');
+      const query = this.ledgerRepository.createQueryBuilder("entry");
 
       if (filters.accountId) {
-        query.andWhere('entry.accountId = :accountId', { accountId: filters.accountId });
+        query.andWhere("entry.accountId = :accountId", {
+          accountId: filters.accountId,
+        });
       }
 
       if (filters.entityId) {
-        query.andWhere('entry.entityId = :entityId', { entityId: filters.entityId });
+        query.andWhere("entry.entityId = :entityId", {
+          entityId: filters.entityId,
+        });
       }
 
       if (filters.transactionId) {
-        query.andWhere('entry.transactionId = :transactionId', {
+        query.andWhere("entry.transactionId = :transactionId", {
           transactionId: filters.transactionId,
         });
       }
 
       if (filters.startDate) {
-        query.andWhere('entry.timestamp >= :startDate', { startDate: filters.startDate });
+        query.andWhere("entry.timestamp >= :startDate", {
+          startDate: filters.startDate,
+        });
       }
 
       if (filters.endDate) {
-        query.andWhere('entry.timestamp <= :endDate', { endDate: filters.endDate });
+        query.andWhere("entry.timestamp <= :endDate", {
+          endDate: filters.endDate,
+        });
       }
 
       if (filters.excludeReversed) {
-        query.andWhere('entry.isReversed = :isReversed', { isReversed: false });
+        query.andWhere("entry.isReversed = :isReversed", { isReversed: false });
       }
 
       // Get total count before pagination
       const total = await query.getCount();
 
       // Apply pagination
-      query.orderBy('entry.timestamp', 'DESC');
+      query.orderBy("entry.timestamp", "DESC");
 
       if (filters.limit) {
         query.take(filters.limit);
@@ -418,7 +449,7 @@ export class LedgerService {
     try {
       return await this.ledgerRepository.find({
         where: { transactionId },
-        order: { timestamp: 'ASC' },
+        order: { timestamp: "ASC" },
       });
     } catch (error) {
       throw new InternalServerErrorException(
